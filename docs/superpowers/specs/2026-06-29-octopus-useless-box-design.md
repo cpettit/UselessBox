@@ -154,4 +154,8 @@ and throw angle.
 - Exact ESP32 module variant footprint and 3.3 V LDO part (PCB phase).
 - Specific ≥5 A buck IC (PCB phase; must be LCSC-stocked).
 - WS2812 eye count (2 minimum; possibly more for effect).
+- Audio path on the SMD board: place a DFPlayer Mini as a module footprint
+  (simplest, microSD sound swapping) vs. integrate MAX98357A I²S amp + SD
+  (more "integrated", needs audio storage). Breadboard uses DFPlayer module
+  either way.
 - Whether to add a Fritzing-style breadboard picture in addition to the table.
