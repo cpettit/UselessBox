@@ -11,6 +11,5 @@ private:
     bool stable_;
     bool lastRaw_;
     uint32_t lastChangeMs_;
-    uint32_t lastUpdateMs_;
     bool initialized_;
 };
