@@ -11,20 +11,19 @@
 static const uint8_t kCount = 5;
 static const uint8_t SWITCH_PINS[kCount] = {32, 33, 25, 26, 27};
 
-// Per-channel motion. Tune homeAngle/outAngle on the bench so the arm flips
-// the toggle OFF at outAngle and rests clear at homeAngle.
-static ChannelConfig makeCfg() {
-    ChannelConfig c;
-    c.homeAngle = 20;
-    c.outAngle = 110;
-    c.reactHoldMs = 350;
-    c.returnMs = 300;
-    return c;
-}
+// Per-arm tunables: adjust homeAngle/outAngle on the bench so each arm flips
+// its toggle OFF at outAngle and rests clear at homeAngle.
+static ChannelConfig channelCfgs[kCount] = {
+    {20, 110, 350, 300},  // arm 0
+    {20, 110, 350, 300},  // arm 1
+    {20, 110, 350, 300},  // arm 2
+    {20, 110, 350, 300},  // arm 3
+    {20, 110, 350, 300},  // arm 4
+};
 
 static Channel channels[kCount] = {
-    Channel(makeCfg()), Channel(makeCfg()), Channel(makeCfg()),
-    Channel(makeCfg()), Channel(makeCfg())
+    Channel(channelCfgs[0]), Channel(channelCfgs[1]), Channel(channelCfgs[2]),
+    Channel(channelCfgs[3]), Channel(channelCfgs[4])
 };
 
 static ArduinoClock clock_;
@@ -40,6 +39,9 @@ void setup() {
     Wire.begin();          // ESP32 default SDA=21, SCL=22
     servos.begin();
     switches.begin();
+    // A toggle left ON at power-up is treated as immediately stable (Debouncer
+    // initialises its stable state to the first reading), so the octopus will
+    // flip off any switch that is already ON at boot — this is intended behaviour.
     controller.begin();
 }
 

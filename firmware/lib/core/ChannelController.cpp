@@ -6,7 +6,9 @@ ChannelController::ChannelController(ISwitchInput& input, IServoOutput& output,
                                      uint32_t debounceMs)
     : input_(input), output_(output), clock_(clock), channels_(channels),
       count_(count), maxConcurrent_(maxConcurrent) {
-    for (uint8_t i = 0; i < count_ && i < kMaxChannels; i++) {
+    // Clamp to avoid overflowing debouncers_[kMaxChannels] in begin/tick/busyCount.
+    if (count_ > kMaxChannels) { count_ = kMaxChannels; }
+    for (uint8_t i = 0; i < count_; i++) {
         debouncers_[i] = Debouncer(debounceMs);
     }
 }
@@ -34,7 +36,11 @@ void ChannelController::tick() {
         channels_[i].update(now);
     }
 
-    // 2. grant reactions to idle channels whose switch is ON, staggered
+    // 2. grant reactions to idle channels whose switch is ON, staggered.
+    // Grants are evaluated in channel-index order, so lower-index channels win
+    // ties under maxConcurrent limits. Normally invisible (a reacting arm flips
+    // its toggle OFF and yields), but a switch held physically ON would let a
+    // lower-index channel keep re-triggering ahead of higher-index ones.
     uint8_t busy = busyCount();
     for (uint8_t i = 0; i < count_; i++) {
         if (!channels_[i].isBusy() && debouncers_[i].stable()) {
